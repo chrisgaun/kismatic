@@ -189,6 +189,11 @@ var _ = Describe("kismatic", func() {
 						return canAccessDashboard(fmt.Sprintf("https://admin:abbazabba@%s:6443/ui", nodes.master[0].PublicIP))
 					})
 
+					sub.It("should allow creating RBAC policy", func() error {
+						// Run on worker because master uses unauth API endpoint (i.e. localhost:8080)
+						return verifyRBAC(nodes.worker[0], sshKey)
+					})
+
 					// This test should always be last
 					sub.It("should still be a highly available cluster after upgrade", func() error {
 						By("Removing a Kubernetes master node")
