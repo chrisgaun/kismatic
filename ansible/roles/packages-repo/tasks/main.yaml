@@ -17,9 +17,23 @@
       gpgkey: "{{ yum_gpg_key_url }}"
       gpgcheck: yes
     when: ansible_os_family == 'RedHat' and kismatic_result.status is defined and kismatic_result.status == 200
+  - name: add Kismatic custom yum repository
+    yum_repository:
+      name: kismatic-custom
+      description: Kismatic Packages
+      baseurl: "{{ package_repo_url }}"
+      gpgcheck: no
+    when: ansible_os_family == 'RedHat' and package_repo_url is defined and package_repo_url is not empty
+  - name: add Gluster yum repository
+    yum_repository:
+      name: gluster
+      description: Gluster 3.8
+      baseurl: "http://buildlogs.centos.org/centos/7/storage/x86_64/gluster-3.8/"
+      gpgcheck: no
+    when: ansible_os_family == 'RedHat' and 'storage' in group_names
   - name: clean kismatic yum cache
     command: 'yum --disablerepo="*" --enablerepo=kismatic makecache'
-    when: ansible_os_family == 'RedHat' and kismatic_result.status is defined and kismatic_result.status == 200
+    when: ansible_os_family == 'RedHat' and ((kismatic_result.status is defined and kismatic_result.status == 200) or (package_repo_url is defined and package_repo_url is not empty))
 
   # DEB
   - name: ping Kismatic deb repository
@@ -48,7 +62,17 @@
       repo: 'deb {{ deb_repository_url }} kismatic-xenial main'
       validate_certs: no
     when: ansible_os_family == 'Debian' and kismatic_result.status is defined and kismatic_result.status == 200
+  - name: add Kismatic custom deb repository
+    apt_repository:
+      repo: 'deb {{ package_repo_url }} kismatic-custom main'
+      validate_certs: no
+    when: ansible_os_family == 'Debian' and package_repo_url is defined and package_repo_url is not empty
+  - name: add Gluster deb repository
+    apt_repository:
+      repo: ppa:gluster/glusterfs-3.8
+      update_cache: yes
+    when: ansible_os_family == 'Debian' and 'storage' in group_names
   - name: apt-get update
     apt:
       update_cache: yes
-    when: ansible_os_family == 'Debian' and kismatic_result.status is defined and kismatic_result.status == 200
+    when: ansible_os_family == 'Debian' and ((kismatic_result.status is defined and kismatic_result.status == 200) or (package_repo_url is defined and package_repo_url is not empty))
