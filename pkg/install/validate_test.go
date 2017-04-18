@@ -740,7 +740,7 @@ func TestValidateDockerStorageDirectLVM(t *testing.T) {
 	}
 }
 
-func TestGPGKeyURL(t *testing.T) {
+func TestGPGKeys(t *testing.T) {
 	tests := []struct {
 		config Cluster
 		valid  bool
@@ -748,35 +748,77 @@ func TestGPGKeyURL(t *testing.T) {
 		{
 			config: Cluster{
 				PackageRepoURL: "",
-				PackageGPGKey:  "",
+				PackageGPGKeys: "",
 			},
 			valid: true,
 		},
 		{
 			config: Cluster{
 				PackageRepoURL: "https://repo.com",
-				PackageGPGKey:  "https://kismatic.com/key.gpg",
+				PackageGPGKeys: "https://kismatic.com/key.gpg",
 			},
 			valid: true,
 		},
 		{
 			config: Cluster{
 				PackageRepoURL: "https://repo.com",
-				PackageGPGKey:  "/bin/sh",
+				PackageGPGKeys: "https://kismatic.com/key.gpg,https://gluster.com/key.gpg",
 			},
 			valid: true,
 		},
 		{
 			config: Cluster{
 				PackageRepoURL: "https://repo.com",
-				PackageGPGKey:  "",
+				PackageGPGKeys: "/bin/sh",
+			},
+			valid: true,
+		},
+		{
+			config: Cluster{
+				PackageRepoURL: "https://repo.com",
+				PackageGPGKeys: "/bin/sh,/bin/sh",
+			},
+			valid: true,
+		},
+		{
+			config: Cluster{
+				PackageRepoURL: "https://repo.com",
+				PackageGPGKeys: "",
 			},
 			valid: false,
 		},
 		{
 			config: Cluster{
 				PackageRepoURL: "https://repo.com",
-				PackageGPGKey:  "fakeURI",
+				PackageGPGKeys: "/tmp/notreal",
+			},
+			valid: false,
+		},
+		{
+			config: Cluster{
+				PackageRepoURL: "https://repo.com",
+				PackageGPGKeys: "tmp/notreal",
+			},
+			valid: false,
+		},
+		{
+			config: Cluster{
+				PackageRepoURL: "https://repo.com",
+				PackageGPGKeys: "fakeURI",
+			},
+			valid: false,
+		},
+		{
+			config: Cluster{
+				PackageRepoURL: "https://repo.com",
+				PackageGPGKeys: "https://kismatic.com/key.gpg,gluster.com/key.gpg",
+			},
+			valid: false,
+		},
+		{
+			config: Cluster{
+				PackageRepoURL: "https://repo.com",
+				PackageGPGKeys: "/bin/sh,bin/sh",
 			},
 			valid: false,
 		},
@@ -784,7 +826,7 @@ func TestGPGKeyURL(t *testing.T) {
 	for i, test := range tests {
 		p := &validPlan
 		p.Cluster.PackageRepoURL = test.config.PackageRepoURL
-		p.Cluster.PackageGPGKey = test.config.PackageGPGKey
+		p.Cluster.PackageGPGKeys = test.config.PackageGPGKeys
 		ok, _ := p.Cluster.validate()
 		if ok != test.valid {
 			t.Errorf("test %d: expect %t, but got %t", i, test.valid, ok)

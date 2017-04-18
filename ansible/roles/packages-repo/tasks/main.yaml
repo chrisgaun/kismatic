@@ -1,9 +1,10 @@
 ---
   - name: copy GPG key to /temp
     copy:
-      src: "{{ gpg_key_is_a_file }}"
-      dest: "/tmp/key"
+      src: "{{ item.1 }}"
+      dest: "/tmp/key{{ item.0 }}"
     when: gpg_key_is_a_file is defined and gpg_key_is_a_file|bool == yes
+    with_indexed_items: "gpg_keys.split(',')"
   # YUM
   - name: ping Kismatic yum repository
     uri: url="{{ yum_gpg_key_url }}"
@@ -33,25 +34,31 @@
       name: gluster
       description: Gluster 3.8
       baseurl: "http://buildlogs.centos.org/centos/7/storage/x86_64/gluster-3.8/"
-      gpgcheck: no
-    when: ansible_os_family == 'RedHat' and 'storage' in group_names
+      gpgkey: "https://download.gluster.org/pub/gluster/glusterfs/3.8/3.8.7/rsa.pub"
+      gpgcheck: yes
+    when: >
+          ansible_os_family == 'RedHat' and
+          'storage' in group_names and
+          (kismatic_result is defined and kismatic_result.status is defined and kismatic_result.status == 200)
 
-  - name: add Kismatic custom yum key
+  - name: add Kismatic custom yum keys
     rpm_key:
       state: present
-      url: "{{ gpg_key }}"
+      url: "{{ item }}"
     when: >
           ansible_os_family == 'RedHat' and
-          (gpg_key_url is defined and gpg_key_url is not empty) and
+          (gpg_keys is defined and gpg_keys is not empty) and
           (gpg_key_is_a_file is unedefined or (gpg_key_is_a_file is defined and gpg_key_is_a_file|bool == no))
-  - name: add Kismatic custom yum key from file
+    with_items: "gpg_keys.split(',')"
+  - name: add Kismatic custom yum keys from file
     rpm_key:
       state: present
-      url: "/tmp/key"
+      url: "/tmp/key{{ item.0 }}"
     when: >
           ansible_os_family == 'RedHat' and
-          (gpg_key_url is defined and gpg_key_url is not empty) and
+          (gpg_keys is defined and gpg_keys is not empty) and
           (gpg_key_is_a_file is defined and gpg_key_is_a_file|bool == yes)
+    with_indexed_items: "gpg_keys.split(',')"
 
   - name: add Kismatic custom yum repository
     yum_repository:
@@ -107,24 +114,29 @@
     apt_repository:
       repo: ppa:gluster/glusterfs-3.8
       update_cache: yes
-    when: ansible_os_family == 'Debian' and 'storage' in group_names
+    when: >
+          ansible_os_family == 'Debian' and
+          'storage' in group_names and
+          (kismatic_result is defined and kismatic_result.status is defined and kismatic_result.status == 200)
 
-  - name: add Kismatic custom deb key
+  - name: add Kismatic custom deb keys
     apt_key:
-      url: "{{ gpg_key_url }}"
+      url: "{{ item }}"
       validate_certs: no
     when: >
           ansible_os_family == 'Debian' and
-          (gpg_key_url is defined and gpg_key_url is not empty) and
+          (gpg_keys is defined and gpg_keys is not empty) and
           (gpg_key_is_a_file is unedefined or (gpg_key_is_a_file is defined and gpg_key_is_a_file|bool == no))
-  - name: add Kismatic custom deb key from file
+    with_items: "gpg_keys.split(',')"
+  - name: add Kismatic custom deb keys from file
     apt_key:
-      url: "/tmp/key"
+      url: "/tmp/key{{ item.0 }}"
       validate_certs: no
     when: >
           ansible_os_family == 'Debian' and
-          (gpg_key_url is defined and gpg_key_url is not empty) and
+          (gpg_keys is defined and gpg_keys is not empty) and
           (gpg_key_is_a_file is defined and gpg_key_is_a_file|bool == yes)
+    with_indexed_items: "gpg_keys.split(',')"
   - name: add Kismatic custom deb repository
     apt_repository:
       repo: 'deb {{ package_repo_url }} kismatic-custom main'

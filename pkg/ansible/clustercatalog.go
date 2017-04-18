@@ -18,8 +18,8 @@ type ClusterCatalog struct {
 	EnableCalicoPolicy        bool   `yaml:"enable_calico_policy"`
 	EnablePackageInstallation bool   `yaml:"allow_package_installation"`
 	PackageRepoURL            string `yaml:"package_repo_url"`
-	PackageGPGKey             string `yaml:"gpg_key"`
-	PackageGPGKeyIsAFile      bool   `yaml:"gpg_key_is_a_file"`
+	PackageGPGKeys            string `yaml:"gpg_keys"`
+	PackageGPGKeysIsAFile     bool   `yaml:"gpg_key_is_a_file"`
 	DisconnectedInstallation  bool   `yaml:"disconnected_installation"`
 	KuberangPath              string `yaml:"kuberang_path"`
 	LoadBalancedFQDN          string `yaml:"kubernetes_load_balanced_fqdn"`
