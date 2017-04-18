@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -147,6 +148,22 @@ func (c *Cluster) validate() (bool, []error) {
 	}
 	if c.AdminPassword == "" {
 		v.addError(errors.New("Admin password cannot be empty"))
+	}
+	if c.PackageRepoURL != "" && c.PackageGPGKey == "" {
+		v.addError(errors.New("Repository GPG key cannot be empty"))
+	}
+	if c.PackageGPGKey != "" {
+		var validPath bool
+		if filepath.IsAbs(c.PackageGPGKey) {
+			if _, err := os.Stat(c.PackageGPGKey); err != nil {
+				validPath = true
+			}
+		}
+		_, err := url.ParseRequestURI(c.PackageGPGKey)
+		validURL := err == nil
+		if (validPath || validURL) != true {
+			v.addError(errors.New("Repository GPG key must be a valid URL or an absotule path"))
+		}
 	}
 	v.validate(&c.Networking)
 	v.validate(&c.Certificates)

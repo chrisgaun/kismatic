@@ -739,3 +739,55 @@ func TestValidateDockerStorageDirectLVM(t *testing.T) {
 		}
 	}
 }
+
+func TestGPGKeyURL(t *testing.T) {
+	tests := []struct {
+		config Cluster
+		valid  bool
+	}{
+		{
+			config: Cluster{
+				PackageRepoURL: "",
+				PackageGPGKey:  "",
+			},
+			valid: true,
+		},
+		{
+			config: Cluster{
+				PackageRepoURL: "https://repo.com",
+				PackageGPGKey:  "https://kismatic.com/key.gpg",
+			},
+			valid: true,
+		},
+		{
+			config: Cluster{
+				PackageRepoURL: "https://repo.com",
+				PackageGPGKey:  "/bin/sh",
+			},
+			valid: true,
+		},
+		{
+			config: Cluster{
+				PackageRepoURL: "https://repo.com",
+				PackageGPGKey:  "",
+			},
+			valid: false,
+		},
+		{
+			config: Cluster{
+				PackageRepoURL: "https://repo.com",
+				PackageGPGKey:  "fakeURI",
+			},
+			valid: false,
+		},
+	}
+	for i, test := range tests {
+		p := &validPlan
+		p.Cluster.PackageRepoURL = test.config.PackageRepoURL
+		p.Cluster.PackageGPGKey = test.config.PackageGPGKey
+		ok, _ := p.Cluster.validate()
+		if ok != test.valid {
+			t.Errorf("test %d: expect %t, but got %t", i, test.valid, ok)
+		}
+	}
+}
