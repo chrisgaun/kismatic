@@ -17,9 +17,7 @@ type ClusterCatalog struct {
 	EnableModifyHosts         bool   `yaml:"modify_hosts_file"`
 	EnableCalicoPolicy        bool   `yaml:"enable_calico_policy"`
 	EnablePackageInstallation bool   `yaml:"allow_package_installation"`
-	PackageRepoURL            string `yaml:"package_repo_url"`
-	PackageGPGKeys            string `yaml:"gpg_keys"`
-	PackageGPGKeysIsAFile     bool   `yaml:"gpg_key_is_a_file"`
+	PackageRepoURLs           string `yaml:"package_repository_urls"`
 	DisconnectedInstallation  bool   `yaml:"disconnected_installation"`
 	KuberangPath              string `yaml:"kuberang_path"`
 	LoadBalancedFQDN          string `yaml:"kubernetes_load_balanced_fqdn"`

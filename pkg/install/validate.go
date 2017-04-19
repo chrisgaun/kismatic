@@ -149,23 +149,11 @@ func (c *Cluster) validate() (bool, []error) {
 	if c.AdminPassword == "" {
 		v.addError(errors.New("Admin password cannot be empty"))
 	}
-	if c.PackageRepoURL != "" && c.PackageGPGKeys == "" {
-		v.addError(errors.New("Repository GPG key cannot be empty"))
-	}
-	if c.PackageGPGKeys != "" {
-		keys := strings.Split(c.PackageGPGKeys, ",")
-		for _, key := range keys {
-			var validPath, validURL bool
-			if filepath.IsAbs(key) {
-				if _, err := os.Stat(key); err == nil {
-					validPath = true
-				}
-			} else {
-				_, err := url.ParseRequestURI(key)
-				validURL = (err == nil)
-			}
-			if (validPath || validURL) != true {
-				v.addError(fmt.Errorf("Repository GPG key %s must be a valid URL or an absotule path", key))
+	if c.PackageRepoURLs != "" {
+		urls := strings.Split(c.PackageRepoURLs, ",")
+		for _, u := range urls {
+			if _, err := url.ParseRequestURI(u); err != nil {
+				v.addError(fmt.Errorf("Package repository %s must be a valid URL", u))
 			}
 		}
 	}

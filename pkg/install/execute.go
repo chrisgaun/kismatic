@@ -668,16 +668,10 @@ func (ae *ansibleExecutor) buildClusterCatalog(p *Plan) (*ansible.ClusterCatalog
 		EnableModifyHosts:         p.Cluster.Networking.UpdateHostsFiles,
 		EnableCalicoPolicy:        p.Cluster.Networking.PolicyEnabled,
 		EnablePackageInstallation: p.Cluster.AllowPackageInstallation,
-		PackageRepoURL:            p.Cluster.PackageRepoURL,
-		PackageGPGKeys:            p.Cluster.PackageGPGKeys,
+		PackageRepoURLs:           p.Cluster.PackageRepoURLs,
 		KuberangPath:              filepath.Join("kuberang", "linux", "amd64", "kuberang"),
 		DisconnectedInstallation:  p.Cluster.DisconnectedInstallation,
 		TargetVersion:             AboutKismatic.String(),
-	}
-
-	// If key is a file set a cluster option
-	if p.Cluster.PackageGPGKeys != "" && filepath.IsAbs(p.Cluster.PackageGPGKeys) {
-		cc.PackageGPGKeysIsAFile = true
 	}
 
 	// Setup FQDN or default to first master

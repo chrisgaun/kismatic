@@ -1,24 +1,5 @@
 ---
-  - name: copy GPG key to /temp
-    copy:
-      src: "{{ item.1 }}"
-      dest: "/tmp/key{{ item.0 }}"
-    when: gpg_key_is_a_file is defined and gpg_key_is_a_file|bool == yes
-    with_indexed_items: "gpg_keys.split(',')"
   # YUM
-  - name: ping Kismatic yum repository
-    uri: url="{{ yum_gpg_key_url }}"
-    ignore_errors: yes
-    register: kismatic_result
-    until: "kismatic_result.status is defined and kismatic_result.status == 200"
-    retries: 3
-    delay: 1
-    changed_when: "kismatic_result.status is defined and kismatic_result.status == 200"
-    when: >
-          ansible_os_family == 'RedHat' and
-          ((package_repo_url is undefined) or
-          (package_repo_url is defined and package_repo_url is empty))
-
   - name: add Kismatic yum repository
     yum_repository:
       name: kismatic
@@ -26,9 +7,8 @@
       baseurl: "{{ yum_repository_url }}"
       gpgkey: "{{ yum_gpg_key_url }}"
       gpgcheck: yes
-    when: >
-          ansible_os_family == 'RedHat' and
-          (kismatic_result is defined and kismatic_result.status is defined and kismatic_result.status == 200)
+    when: ansible_os_family == 'RedHat'
+
   - name: add Gluster yum repository
     yum_repository:
       name: gluster
@@ -36,117 +16,38 @@
       baseurl: "http://buildlogs.centos.org/centos/7/storage/x86_64/gluster-3.8/"
       gpgkey: "https://download.gluster.org/pub/gluster/glusterfs/3.8/3.8.7/rsa.pub"
       gpgcheck: yes
-    when: >
-          ansible_os_family == 'RedHat' and
-          'storage' in group_names and
-          (kismatic_result is defined and kismatic_result.status is defined and kismatic_result.status == 200)
-
-  - name: add Kismatic custom yum keys
-    rpm_key:
-      state: present
-      url: "{{ item }}"
-    when: >
-          ansible_os_family == 'RedHat' and
-          (gpg_keys is defined and gpg_keys is not empty) and
-          (gpg_key_is_a_file is unedefined or (gpg_key_is_a_file is defined and gpg_key_is_a_file|bool == no))
-    with_items: "gpg_keys.split(',')"
-  - name: add Kismatic custom yum keys from file
-    rpm_key:
-      state: present
-      url: "/tmp/key{{ item.0 }}"
-    when: >
-          ansible_os_family == 'RedHat' and
-          (gpg_keys is defined and gpg_keys is not empty) and
-          (gpg_key_is_a_file is defined and gpg_key_is_a_file|bool == yes)
-    with_indexed_items: "gpg_keys.split(',')"
-
-  - name: add Kismatic custom yum repository
-    yum_repository:
-      name: kismatic-custom
-      description: Kismatic Packages
-      baseurl: "{{ package_repo_url }}"
-      gpgcheck: yes
-    when: ansible_os_family == 'RedHat' and (package_repo_url is defined and package_repo_url is not empty)
+    when: ansible_os_family == 'RedHat' and 'storage' in group_names
 
   - name: clean kismatic yum cache
-    command: 'yum --disablerepo="*" --enablerepo={{if package_repo_url is defined and package_repo_url is not empty}}{{package_repo_url}}{{else}}kismatic,gluster{{end}}makecache'
-    when: >
-          ansible_os_family == 'RedHat' and
-          ((kismatic_result.status is defined and kismatic_result.status == 200) or
-          (package_repo_url is defined and package_repo_url is not empty))
+    command: 'yum makecache'
+    when: ansible_os_family == 'RedHat'
 
   # DEB
-  - name: ping Kismatic deb repository
-    uri: url="{{ deb_gpg_key_url }}"
-    ignore_errors: yes
-    register: kismatic_result
-    until: "kismatic_result.status is defined and kismatic_result.status == 200"
-    retries: 3
-    delay: 1
-    changed_when: "kismatic_result.status is defined and kismatic_result.status == 200"
-    when: >
-          ansible_os_family == 'Debian' and
-          ((package_repo_url is undefined) or
-          (package_repo_url is defined and package_repo_url is empty))
-
   - name: install apt-transport-https package
     apt:
       name: apt-transport-https
       state: latest
       update_cache: yes
-    when: >
-          ansible_os_family == 'Debian'
+    when: ansible_os_family == 'Debian'
+
   - name: add Kismatic deb key
     apt_key:
       url: "{{ deb_gpg_key_url }}"
       validate_certs: no
-    when: >
-          ansible_os_family == 'Debian' and
-          (kismatic_result is defined and kismatic_result.status is defined and kismatic_result.status == 200)
+    when: ansible_os_family == 'Debian'
+
   - name: add Kismatic deb repository
     apt_repository:
       repo: 'deb {{ deb_repository_url }} kismatic-xenial main'
       validate_certs: no
-    when: >
-          ansible_os_family == 'Debian' and
-          (kismatic_result is defined and kismatic_result.status is defined and kismatic_result.status == 200)
+    when: ansible_os_family == 'Debian'
   - name: add Gluster deb repository
     apt_repository:
       repo: ppa:gluster/glusterfs-3.8
       update_cache: yes
-    when: >
-          ansible_os_family == 'Debian' and
-          'storage' in group_names and
-          (kismatic_result is defined and kismatic_result.status is defined and kismatic_result.status == 200)
-
-  - name: add Kismatic custom deb keys
-    apt_key:
-      url: "{{ item }}"
-      validate_certs: no
-    when: >
-          ansible_os_family == 'Debian' and
-          (gpg_keys is defined and gpg_keys is not empty) and
-          (gpg_key_is_a_file is unedefined or (gpg_key_is_a_file is defined and gpg_key_is_a_file|bool == no))
-    with_items: "gpg_keys.split(',')"
-  - name: add Kismatic custom deb keys from file
-    apt_key:
-      url: "/tmp/key{{ item.0 }}"
-      validate_certs: no
-    when: >
-          ansible_os_family == 'Debian' and
-          (gpg_keys is defined and gpg_keys is not empty) and
-          (gpg_key_is_a_file is defined and gpg_key_is_a_file|bool == yes)
-    with_indexed_items: "gpg_keys.split(',')"
-  - name: add Kismatic custom deb repository
-    apt_repository:
-      repo: 'deb {{ package_repo_url }} kismatic-custom main'
-      validate_certs: no
-    when: ansible_os_family == 'Debian' and (package_repo_url is defined and package_repo_url is not empty)
+    when: ansible_os_family == 'Debian' and 'storage' in group_names
 
   - name: apt-get update
     apt:
       update_cache: yes
-    when: >
-          ansible_os_family == 'Debian' and
-          ((kismatic_result.status is defined and kismatic_result.status == 200) or
-          (package_repo_url is defined and package_repo_url is not empty))
+    when: ansible_os_family == 'Debian'

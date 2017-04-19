@@ -33,8 +33,7 @@ type Cluster struct {
 	Name                     string
 	AdminPassword            string `yaml:"admin_password"`
 	AllowPackageInstallation bool   `yaml:"allow_package_installation"`
-	PackageRepoURL           string `yaml:"package_repo_url"`
-	PackageGPGKeys           string `yaml:"package_gpg_keys"`
+	PackageRepoURLs          string `yaml:"package_repository_urls"`
 	DisconnectedInstallation bool   `yaml:"disconnected_installation"`
 	Networking               NetworkConfig
 	Certificates             CertsConfig
