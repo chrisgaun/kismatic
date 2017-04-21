@@ -23,12 +23,13 @@
     retries: 3
     delay: 3
     when: ansible_os_family == 'RedHat'
-    
+
   # DEB
   - name: install etcd deb package
     apt:
       name: etcd={{etcd_apt_version}}
       state: present
+      allow_unauthenticated: '{% if package_repository_urls is defined and package_repository_urls != "" %}yes{% else %}no{% endif %}'
       default_release: kismatic-xenial
     register: etcd_installation_deb
     until: etcd_installation_deb|success
@@ -40,6 +41,7 @@
   - name: install curl deb package
     apt:
       name: curl
+      allow_unauthenticated: '{% if package_repository_urls is defined and package_repository_urls != "" %}yes{% else %}no{% endif %}'
       state: present
     register: etcd_installation_deb
     until: etcd_installation_deb|success

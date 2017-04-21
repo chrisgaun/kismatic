@@ -30,6 +30,7 @@
     apt:
       name: kubelet={{ kismatic_apt_version }}
       state: present
+      allow_unauthenticated: '{% if package_repository_urls is defined and package_repository_urls != "" %}yes{% else %}no{% endif %}'
       default_release: kismatic-xenial
     register: kubelet_installation_deb
     until: kubelet_installation_deb|success
@@ -41,6 +42,7 @@
     apt:
       name: kubectl={{ kismatic_apt_version }}
       state: present
+      allow_unauthenticated: '{% if package_repository_urls is defined and package_repository_urls != "" %}yes{% else %}no{% endif %}'
       default_release: kismatic-xenial
     register: result
     until: result|success

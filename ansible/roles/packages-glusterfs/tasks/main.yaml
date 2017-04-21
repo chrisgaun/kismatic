@@ -15,8 +15,8 @@
   - name: install glusterfs deb package
     apt:
       name: glusterfs-server{{glusterfs_server_version}}
+      allow_unauthenticated: '{% if package_repository_urls is defined and package_repository_urls != "" %}yes{% else %}no{% endif %}'
       state: present
-      default_release: kismatic-xenial
     register: etcd_installation_deb
     until: etcd_installation_deb|success
     retries: 3
