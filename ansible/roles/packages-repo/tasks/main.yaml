@@ -19,7 +19,7 @@
     when: ansible_os_family == 'RedHat' and 'storage' in group_names
 
   - name: clean kismatic yum cache
-    command: 'yum makecache'
+    command: 'yum --disablerepo="*" --enablerepo="kismatic,gluster" makecache'
     when: ansible_os_family == 'RedHat'
 
   # DEB
