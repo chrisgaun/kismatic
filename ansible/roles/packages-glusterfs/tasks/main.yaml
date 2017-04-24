@@ -5,9 +5,9 @@
       state: present
       disablerepo: '{% if package_repository_urls is defined and package_repository_urls != "" %}*{% endif %}'
       enablerepo: '{% if package_repository_urls is defined and package_repository_urls != "" %}kismatic-*{% endif %}'
-      disable_gpg_check: yes
-    register: etcd_installation_rpm
-    until: etcd_installation_rpm|success
+      disable_gpg_check: yes    # does not work on RHEL
+    register: glusterfs_rpm
+    until: glusterfs_rpm|success
     retries: 3
     delay: 3
     when: ansible_os_family == 'RedHat'
@@ -17,8 +17,8 @@
       name: glusterfs-server{{glusterfs_server_version}}
       allow_unauthenticated: '{% if package_repository_urls is defined and package_repository_urls != "" %}yes{% else %}no{% endif %}'
       state: present
-    register: etcd_installation_deb
-    until: etcd_installation_deb|success
+    register: glusterfs_deb
+    until: glusterfs_deb|success
     retries: 3
     delay: 3
     when: ansible_os_family == 'Debian'

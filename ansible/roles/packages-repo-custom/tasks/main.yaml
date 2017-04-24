@@ -29,23 +29,26 @@
   - name: stat /etc/apt/sources.list
     stat: path=/etc/apt/sources.list
     register: apt_sources
+    when: ansible_os_family == 'Debian'
 
   - name: rename /etc/apt/sources.list
     command: mv /etc/apt/sources.list /etc/apt/sources.list.backup
-    when: apt_sources.stat.exists
+    when: apt_sources.stat.exists and ansible_os_family == 'Debian'
 
   - name: stat /etc/apt/sources.list.d/
     stat: path=/etc/apt/sources.list.d/
     register: apt_sources_d
+    when: ansible_os_family == 'Debian'
 
   - name: rename /etc/apt/sources.list.d/
     command: mv /etc/apt/sources.list.d/ /etc/apt/sources.list.d.backup
-    when: apt_sources_d.stat.exists
+    when: apt_sources_d.stat.exists and ansible_os_family == 'Debian
 
   - name: create /etc/apt/sources.list.d/ directory
     file:
       path: "/etc/apt/sources.list.d/"
       state: directory
+    when: ansible_os_family == 'Debian'
 
   - name: add Kismatic deb key
     apt_key:
