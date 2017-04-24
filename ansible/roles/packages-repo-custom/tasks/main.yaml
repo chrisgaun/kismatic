@@ -58,10 +58,10 @@
 
   - name: add Kismatic deb repository
     apt_repository:
-      repo: 'deb {{ item.1 }} kismatic-xenial main'
+      repo: 'deb {{ item }} kismatic-xenial main'
       validate_certs: no
     when: ansible_os_family == 'Debian'
-    with_indexed_items: "package_repository_urls.split(',')"
+    with_items: "package_repository_urls.split(',')"
 
   - name: apt-get update
     apt:

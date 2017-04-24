@@ -18,8 +18,8 @@
       state: present
       disablerepo: '{% if package_repository_urls is defined and package_repository_urls != "" %}*{% endif %}'
       enablerepo: '{% if package_repository_urls is defined and package_repository_urls != "" %}kismatic-*{% endif %}'
-    register: etcd_installation_rpm
-    until: etcd_installation_rpm|success
+    register: curl_installation_rpm
+    until: curl_installation_rpm|success
     retries: 3
     delay: 3
     when: ansible_os_family == 'RedHat'
@@ -43,8 +43,8 @@
       name: curl
       allow_unauthenticated: '{% if package_repository_urls is defined and package_repository_urls != "" %}yes{% else %}no{% endif %}'
       state: present
-    register: etcd_installation_deb
-    until: etcd_installation_deb|success
+    register: curl_installation_deb
+    until: curl_installation_deb|success
     retries: 3
     delay: 3
     when: ansible_os_family == 'Debian'

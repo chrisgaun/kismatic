@@ -7,8 +7,8 @@
 
     roles:
       - role: packages-offline
-        when: allow_package_installation|bool == true and disconnected_installation|bool == true
+        when: allow_package_installation|bool == true and disconnected_installation|bool == true  # install when allowed to install and disconnected
       - role: docker-registry-container
-        when: upgrading is not defined or upgrading|bool == false
+        when: setup_internal_docker_registry|bool == true and (upgrading is not defined or upgrading|bool == false) # setup a registry running on master[0]
       - role: docker-registry-images
-        when: use_private_docker_registry|bool == true and disconnected_installation|bool == true
+        when: use_private_docker_registry|bool == true and disconnected_installation|bool == true # load docker images into the registry
